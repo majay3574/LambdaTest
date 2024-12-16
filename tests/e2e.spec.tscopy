@@ -1,0 +1,46 @@
+import { expect } from "@playwright/test";
+import test from "../lambdatest-setup";
+import { LambdaTestPage } from "../page/lambdaTestPage";
+
+test.describe.skip('LambdaTest Scenarios', async () => {
+    test.describe.configure({ 'mode': 'serial' })
+    test('Scenario 1: Simple Form Demo', async ({ page }) => {
+        const lambdaTestPage = new LambdaTestPage(page);
+        await lambdaTestPage.goToPlayground();
+        await lambdaTestPage.clickSimpleFormDemo();
+        await expect(page).toHaveURL(/simple-form-demo/);
+        const testMessage = 'Welcome to LambdaTest';
+        await lambdaTestPage.fillMessage(testMessage);
+        await lambdaTestPage.clickShowInputButton();
+        const displayedMessage = await lambdaTestPage.getDisplayedMessage();
+        expect(displayedMessage).toBe(testMessage);
+    })
+
+    test('Scenario 2: Drag & Drop Sliders', async ({ page }) => {
+        const lambdaTestPage = new LambdaTestPage(page);
+
+        await lambdaTestPage.goToPlayground();
+        await lambdaTestPage.clickDragAndDropSliders();
+        const slider = await lambdaTestPage.getSlider();
+        await lambdaTestPage.setSliderValue(95);
+        const output = page.locator("//output[text()='95']");
+        await expect(output).toBeVisible();
+    });
+
+    test('Scenario 3: Input Form Submit', async ({ page }) => {
+        const lambdaTestPage = new LambdaTestPage(page);
+        await lambdaTestPage.goToPlayground();
+        await lambdaTestPage.clickInputFormSubmit();
+        await lambdaTestPage.clickSubmitButton();
+        const errorMessage = await lambdaTestPage.getErrorMessage();
+        //note:
+        // Actually, you have mentioned 'Please fill in the fields,' but it is 'Please fill out this field.'
+        expect(errorMessage).toContain('Please fill out this field.');
+        await lambdaTestPage.fillForm();
+        await lambdaTestPage.clickSubmitButton();
+        const successMessage = await lambdaTestPage.getSuccessMessage();
+        expect(successMessage).toContain('Thanks for contacting us, we will get back to you shortly.');
+
+    })
+
+})
